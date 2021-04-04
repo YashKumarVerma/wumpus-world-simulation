@@ -10,7 +10,7 @@ class WumpusWorld:
     # dimension of the world
     n = 0
     maze = []
-    occupiedBlocks = []
+    occupiedBlocks = [[1,1]]
     
     def playGame(self):
         self.n = getInt("Enter the dimension of the world (single number) : ")
@@ -22,31 +22,58 @@ class WumpusWorld:
                 self.maze[i].append(Block())
         
     
+        # generating pits
         pits = randint(1,3)
-        # pits = getInt("Enter the number of pits : ")
         worldLogger.info(f"Generating {pits} pits randomly")
         for i in range(0, pits):
-            x = randint(1, self.n)
-            y = randint(1, self.n)
+            pitTryCounter = 0
+            x = 0
+            y = 0
+            
+            # try 10 times before quitting
+            while pitTryCounter < 10:
+                x = randint(1, self.n)
+                y = randint(1, self.n)
+                
+                if(self.isBlockFree(x,y)):
+                    break
+                
+                if(pitTryCounter == 100):
+                    worldLogger.info("Could not resolve pit location conflict after 100 tries")
+                pitTryCounter+=1
             
             self.addPit(self.n - x, y-1)
+            self.occupyBlock(x,y)
             
-      
         wumpusLocationX = getInt("Enter location of wumpus, x coordinate : ")
         wumpusLocationY = getInt("Enter location of wumpus, y coordinate : ")
-        
         self.addWumpus(self.n - wumpusLocationX, wumpusLocationY-1)
         
        
-        goldLocationX = getInt("Enter location of gold, x coordinate :")
-        goldLocationY = getInt("Enter location of gold, y coordinate :")
-        
+        goldTryCounter = 0
+        goldLocationX = 0
+        goldLocationY = 0
+            
+        while(goldTryCounter < 10):
+            goldLocationX = randint(1, self.n)
+            goldLocationY = randint(1, self.n)
+            if(self.isBlockFree(x,y)):
+                break
+            goldTryCounter += 1
+            
+            if goldTryCounter == 100:
+                worldLogger.info("Could not resolve gold conflict after 100 tries")
+                return False
+
         self.addGold(self.n - goldLocationX, goldLocationY-1)
+        self.occupyBlock(goldLocationX, goldLocationY)
         
         
-      
-        startLocationX = getInt("Enter location of start, x coordinate :")
-        startLocationY = getInt("Enter location of start, y coordinate :")
+        #   always start from 1,1
+        # startLocationX = getInt("Enter location of start, x coordinate :")
+        # startLocationY = getInt("Enter location of start, y coordinate :")
+        startLocationX = 1
+        startLocationY = 1
             
         r = self.n - startLocationX
         c = startLocationY - 1
@@ -144,11 +171,11 @@ class WumpusWorld:
         
      
         if moves <= self.n * self.n:
-            agentLogger.info(f"Found gold in {moves} moves")
+            agentLogger.info(f"\n\n\nFound gold in {moves} moves")
             
     def isBlockFree(self,x,y):
         givenBlock = [x,y]
-        return givenBlock in self.occupiedBlocks
+        return givenBlock not in self.occupiedBlocks
 
     def occupyBlock(self, x, y):
         givenBlock = [x,y]
@@ -168,7 +195,7 @@ class WumpusWorld:
             self.maze[row][col+1].hasBreeze = True
     
     def addWumpus(self, row, col):
-        whumpusLogger.info(f"A WumPus is added to the world")
+        whumpusLogger.info(f"A WumPus is added to the world at {row},{col}")
         self.maze[row][col].hasWumpus = True
         
         if row >= 1 :
@@ -184,7 +211,7 @@ class WumpusWorld:
             self.maze[row][col+1].hasStench = True
      
     def addGold(self, row, col):
-        worldLogger.info(f"A Gold Chest Added to the world")
+        worldLogger.info(f"A Gold Chest Added to the world at {row},{col}")
         self.maze[row][col].hasGold = True
     
     def printMaze(self,r, c):
