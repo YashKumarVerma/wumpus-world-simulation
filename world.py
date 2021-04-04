@@ -11,6 +11,11 @@ class WumpusWorld:
     n = 0
     maze = []
     occupiedBlocks = [[1,1]]
+    path = []
+    points = 0
+    wumpusLocation = []
+    arrowCount = 1
+    solutionFound = False
     
     def playGame(self):
         self.n = getInt("Enter the dimension of the world (single number) : ")
@@ -159,19 +164,40 @@ class WumpusWorld:
                 r = temp1
                 c = temp2
             
-            moves+=1
             
-          
-            worldLogger.info(f"\n\n Move # {moves}")
+            # one point for each step
+            moves+=1
+            self.points -= 1
+            worldLogger.info(f"Move # {moves}")
+            print("\n\n\n")
+            self.path.append([r,c])
+            
+            # if passing by wumpus, means using arrow
+            if([r,c] == self.wumpusLocation):
+                # if arrow available, then kill and reduce points
+                if self.arrowCount == 1:
+                    self.arrowCount = 0
+                    self.points -= 10
+                    worldLogger.info("Shooting an arrow to wumpus")
+                    whumpusLogger.info("KILLED")
+                else:
+                    # else die
+                    self.points -= 1000
+                    break
+                
             self.printMaze(r,c)
             
+            # deduct 1000 points for death
             if moves > self.n*self.n :
-                agentLogger.info("No Solution Found")
+                self.points -= 1000
                 break
         
-     
+        # 1000 points for finding gold
         if moves <= self.n * self.n:
-            agentLogger.info(f"\n\n\nFound gold in {moves} moves")
+            print("\n\n\n\n")
+            agentLogger.info(f"Found gold in {moves} moves")
+            self.solutionFound = True
+            self.points += 1000
             
     def isBlockFree(self,x,y):
         givenBlock = [x,y]
@@ -197,6 +223,7 @@ class WumpusWorld:
     def addWumpus(self, row, col):
         whumpusLogger.info(f"A WumPus is added to the world at {row},{col}")
         self.maze[row][col].hasWumpus = True
+        self.wumpusLocation = [row, col]
         
         if row >= 1 :
             self.maze[row-1][col].hasStench = True
@@ -233,5 +260,18 @@ class WumpusWorld:
             print()
 
 
+agentLogger.info("Welcome to WumPus World !")
+agentLogger.info("simulator written by Yash Kumar Verma")
+
+
 game = WumpusWorld()
 game.playGame()
+
+agentLogger.info(f"Final Points : {game.points} ")
+if game.solutionFound : 
+    agentLogger.info(f"Solution was found in {len(game.path)} turns.")
+    for path in game.path:
+        agentLogger.info(f"( {path[0]}, {path[1]} ) ")
+else:
+    agentLogger.info(f"Solution was not found.")
+    agentLogger.info(f"Last visited coordinate : {game.path[len(game.path)-1]}")
