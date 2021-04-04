@@ -53,6 +53,7 @@ class WumpusWorld:
         wumpusLocationX = getInt("Enter location of wumpus, x coordinate : ")
         wumpusLocationY = getInt("Enter location of wumpus, y coordinate : ")
         self.addWumpus(self.n - wumpusLocationX, wumpusLocationY-1)
+        self.occupyBlock(wumpusLocationX, wumpusLocationY)
         
        
         goldTryCounter = 0
