@@ -9,17 +9,14 @@ import termcolor
 def generic_info(context, message, color):
     print(f"[{context:^8}]  : " + colored(f"{message}", color))
 
-class whumpus:
+class whumpusLogger:
     def info(message):
-        generic_info("whumpus", message, "red")
+        generic_info("🐸", message, "red")
         
-
-class world:
+class worldLogger:
     def info(message):
-        generic_info("world", message, "cyan")
+        generic_info("⛳", message, "cyan")
         
-class agent:
+class agentLogger:
     def info(message):
-        generic_info("agent", message, "yellow")
-        
-
+        generic_info("👨", message, "yellow")
